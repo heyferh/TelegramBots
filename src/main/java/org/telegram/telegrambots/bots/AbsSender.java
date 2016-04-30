@@ -18,26 +18,10 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.telegram.telegrambots.Constants;
 import org.telegram.telegrambots.TelegramApiException;
-import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
-import org.telegram.telegrambots.api.methods.BotApiMethod;
-import org.telegram.telegrambots.api.methods.ForwardMessage;
-import org.telegram.telegrambots.api.methods.GetFile;
-import org.telegram.telegrambots.api.methods.GetMe;
-import org.telegram.telegrambots.api.methods.GetUserProfilePhotos;
+import org.telegram.telegrambots.api.methods.*;
 import org.telegram.telegrambots.api.methods.groupadministration.KickChatMember;
 import org.telegram.telegrambots.api.methods.groupadministration.UnbanChatMember;
-import org.telegram.telegrambots.api.methods.send.SendAudio;
-import org.telegram.telegrambots.api.methods.send.SendChatAction;
-import org.telegram.telegrambots.api.methods.send.SendContact;
-import org.telegram.telegrambots.api.methods.send.SendDocument;
-import org.telegram.telegrambots.api.methods.send.SendLocation;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.api.methods.send.SendSticker;
-import org.telegram.telegrambots.api.methods.send.SendVenue;
-import org.telegram.telegrambots.api.methods.send.SendVideo;
-import org.telegram.telegrambots.api.methods.send.SendVoice;
+import org.telegram.telegrambots.api.methods.send.*;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
@@ -66,6 +50,7 @@ public abstract class AbsSender {
 
     /**
      * Returns the token of the bot to be able to perform Telegram Api Requests
+     *
      * @return Token of the bot
      */
     public abstract String getBotToken();
@@ -178,13 +163,12 @@ public abstract class AbsSender {
         return (UserProfilePhotos) sendApiMethod(getUserProfilePhotos);
     }
 
-    public File getFile(GetFile getFile) throws TelegramApiException{
-    	if(getFile == null){
-    		throw new TelegramApiException("Parameter getFile can not be null");
-    	}
-    	else if(getFile.getFileId() == null){
-    		throw new TelegramApiException("Attribute file_id in parameter getFile can not be null");
-    	}
+    public File getFile(GetFile getFile) throws TelegramApiException {
+        if (getFile == null) {
+            throw new TelegramApiException("Parameter getFile can not be null");
+        } else if (getFile.getFileId() == null) {
+            throw new TelegramApiException("Attribute file_id in parameter getFile can not be null");
+        }
         return (File) sendApiMethod(getFile);
     }
 
@@ -494,7 +478,7 @@ public abstract class AbsSender {
             throw new TelegramApiException("Error at sendPhoto", jsonObject.getString("description"));
         }
 
-        return new Message(jsonObject);
+        return sendPhoto.deserializeResponse(jsonObject);
     }
 
     public Message sendVideo(SendVideo sendVideo) throws TelegramApiException {
@@ -630,6 +614,7 @@ public abstract class AbsSender {
 
     /**
      * Sends a file using Send Audio method (https://core.telegram.org/bots/api#sendaudio)
+     *
      * @param sendAudio Information to send
      * @return If success, the sent Message is returned
      * @throws TelegramApiException If there is any error sending the audio
@@ -637,7 +622,7 @@ public abstract class AbsSender {
     public Message sendAudio(SendAudio sendAudio) throws TelegramApiException {
         String responseContent;
 
-        
+
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
             String url = getBaseUrl() + SendAudio.PATH;
@@ -659,8 +644,8 @@ public abstract class AbsSender {
                 if (sendAudio.getTitle() != null) {
                     builder.addTextBody(SendAudio.TITLE_FIELD, sendAudio.getTitle());
                 }
-                if(sendAudio.getDuration() != null){
-                	builder.addTextBody(SendAudio.DURATION_FIELD, sendAudio.getDuration().toString());
+                if (sendAudio.getDuration() != null) {
+                    builder.addTextBody(SendAudio.DURATION_FIELD, sendAudio.getDuration().toString());
                 }
                 if (sendAudio.getDisableNotification() != null) {
                     builder.addTextBody(SendAudio.DISABLENOTIFICATION_FIELD, sendAudio.getDisableNotification().toString());
@@ -706,13 +691,14 @@ public abstract class AbsSender {
         if (!jsonObject.getBoolean(Constants.RESPONSEFIELDOK)) {
             throw new TelegramApiException("Error at sendAudio", jsonObject.getString("description"));
         }
-        
-         // and if not, we can expect a "result" section. and out of this can a new Message object be built
+
+        // and if not, we can expect a "result" section. and out of this can a new Message object be built
         return new Message(jsonObject.getJSONObject(Constants.RESPONSEFIELDRESULT));
     }
 
     /**
      * Sends a voice note using Send Voice method (https://core.telegram.org/bots/api#sendvoice)
+     *
      * @param sendVoice Information to send
      * @return If success, the sent Message is returned
      * @throws TelegramApiException If there is any error sending the audio

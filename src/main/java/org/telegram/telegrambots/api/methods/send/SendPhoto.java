@@ -1,5 +1,8 @@
 package org.telegram.telegrambots.api.methods.send;
 
+import org.json.JSONObject;
+import org.telegram.telegrambots.Constants;
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 
 /**
@@ -109,6 +112,13 @@ public class SendPhoto {
         this.isNewPhoto = true;
         this.photoName = photoName;
         return this;
+    }
+
+    public Message deserializeResponse(JSONObject answer) {
+        if (answer.getBoolean(Constants.RESPONSEFIELDOK)) {
+            return new Message(answer.getJSONObject(Constants.RESPONSEFIELDRESULT));
+        }
+        return null;
     }
 
     @Override
